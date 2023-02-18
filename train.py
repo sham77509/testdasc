@@ -148,15 +148,15 @@ img, label = load_data()
 img, label = utils.shuffle(img, label)
 train_db = tf.data.Dataset.from_tensor_slices((img, img))
 train_db = train_db.batch(1440)
-train(train_db, epoch_num=50, batch_size=1440, pre_train_epoch=200, alpha=0.9, g_lr=1e-3, d_lr=2e-4)
+# train(train_db, epoch_num=50, batch_size=1440, pre_train_epoch=200, alpha=0.9, g_lr=1e-3, d_lr=2e-4)
 
 
-# theta = train(train_db, label, epoch_num=30, batch_size=1440)
-# np.savetxt('theta.txt', theta)
-# np.savetxt('label.txt', label)
-# theta_T = np.transpose(theta)
+theta = train(train_db, label, epoch_num=30, batch_size=1440)
+np.savetxt('theta.txt', theta)
+np.savetxt('label.txt', label)
+theta_T = np.transpose(theta)
 
-# z, theta = train_ConvAE(train_db, epoch_num=10, batch_size=1440)
+z, theta = train_ConvAE(train_db, epoch_num=10, batch_size=1440)
 
-# np.savetxt('pred.txt', pred)
-# z, theta = train_ConvAE(train_db, epoch_num=10, batch_size=1440)
+np.savetxt('pred.txt', pred)
+z, theta = train_ConvAE(train_db, epoch_num=10, batch_size=1440)
