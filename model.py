@@ -9,6 +9,7 @@ import os
 import math
 from scipy.linalg import qr
 from itertools import combinations as comb
+import tensorflow.python.keras.layers as nn
 # from scipy.sparse.linalg import svds
 # from sklearn.preprocessing import normalize
 
