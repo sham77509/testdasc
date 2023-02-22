@@ -5,7 +5,7 @@ import numpy as np
 import scipy.io as sio
 import tensorflow as tf
 
-# import train_mnist
+import train_mnist
 from train import train
 import utils
 
@@ -21,21 +21,21 @@ def load_data(path='data/COIL20.mat'):
         print(e)
         return None
 
-# def load_mnist():
-#     (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
-#
-#     for i in range(10):
-#         idx = np.where(y_train == i)[0][0:100]
-#         if i == 0:
-#             x = x_train[idx, :, :]
-#             y = y_train[idx]
-#         else:
-#             x = np.concatenate([x, x_train[idx, :, :]], axis=0)
-#             y = np.concatenate([y, y_train[idx]], axis=0)
-#
-#     x = np.reshape(x, [-1, 28, 28, 1])
-#
-#     return x, y
+def load_mnist():
+    (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+
+    for i in range(10):
+        idx = np.where(y_train == i)[0][0:100]
+        if i == 0:
+            x = x_train[idx, :, :]
+            y = y_train[idx]
+        else:
+            x = np.concatenate([x, x_train[idx, :, :]], axis=0)
+            y = np.concatenate([y, y_train[idx]], axis=0)
+
+    x = np.reshape(x, [-1, 28, 28, 1])
+
+    return x, y
 
 def parse_arguments(argv):
 	parser = argparse.ArgumentParser()
@@ -54,12 +54,12 @@ def parse_arguments(argv):
 if __name__ == "__main__":
 	args = parse_arguments(sys.argv[1:])
 
-	# if args.dataset == "mnist":
-	# 	x, y = load_mnist()
-	# 	train_db = tf.data.Dataset.from_tensor_slices((x, y))
-	# 	train_db = train_db.batch(1000).shuffle(30)
-	# 	theta = train_mnist.train(train_db, epoch_num=args.epoch, batch_size=args.batch_size, pre_train_epoch=args.pretrain_epoch,
-	# 			  alpha=args.alpha, g_lr=args.lr_g, d_lr=args.lr_d, pretrain=args.pretrain)
+	if args.dataset == "mnist":
+		x, y = load_mnist()
+		train_db = tf.data.Dataset.from_tensor_slices((x, y))
+		train_db = train_db.batch(1000).shuffle(30)
+		theta = train_mnist.train(train_db, epoch_num=args.epoch, batch_size=args.batch_size, pre_train_epoch=args.pretrain_epoch,
+				  alpha=args.alpha, g_lr=args.lr_g, d_lr=args.lr_d, pretrain=args.pretrain)
 
 	if args.dataset == "coil20":
 		x, y = load_data(path="data/COIL20.mat")
