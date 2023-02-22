@@ -28,7 +28,7 @@ tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 class Self_Attn(Layer):
     """ Self attention Layer"""
     def __init__(self,in_dim,activation):
-        super(Attention,self).__init__()
+        super(Self_Attn,self).__init__()
         self.chanel_in = in_dim
         self.activation = activation
 
