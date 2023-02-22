@@ -23,41 +23,41 @@ tf.keras.backend.set_floatx('float32')
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 # os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
+
+  
 class Self_Attn(Layer):
-        """ Self attention Layer"""
-        def __init__(self, in_dim, activation):
-            super(Self_Attn, self).__init__()
-            self.chanel_in = in_dim
-            self.activation = activation
+    """ Self attention Layer"""
+    def __init__(self,in_dim,activation):
+        super(Attention,self).__init__()
+        self.chanel_in = in_dim
+        self.activation = activation
 
-            self.query_conv = nn.Conv2D(filters=in_dim // 8, kernel_size=1)
-            self.key_conv = nn.Conv2D(filters=in_dim // 8, kernel_size=1)
-            self.value_conv = nn.Conv2D(filters=in_dim, kernel_size=1)
-            self.gamma = tf.Variable(tf.zeros(1))
-	    self.logits = tf.math.log_softmax(self.logits,axis=-1)
-            #self.softmax = tf.keras.layers.Softmax(dim=-1)
-		
-        def call(self, x):
-            """
-                inputs :
-                    x : input feature maps( B X C X W X H)
-                returns :
-                    out : self attention value + input feature
-                    attention: B X N X N (N is Width*Height)
-         """
-            m_batchsize, width, height, C = self.shape
-            proj_query = self.query_conv(x).reshape((m_batchsize, -1, width * height)).permute(0, 2, 1)  # B X CX(N)
-            proj_key = self.key_conv(x).reshape((m_batchsize, -1, width * height))  # B X C x (*W*H)
-            energy = tf.matmul(proj_query, proj_key)  # transpose check
-            attention = self.softmax(energy)  # BX (N) X (N)
-            proj_value = self.value_conv(x).reshape((m_batchsize, -1, width * height))  # B X C X N
+        self.query_conv = nn.Conv2D(filters =in_dim //8 , kernel_size= 1)
+        self.key_conv = nn.Conv2D(filters =in_dim //8 , kernel_size= 1)
+        self.value_conv = nn.Conv2D(filters =in_dim, kernel_size= 1)
+        self.gamma = tf.Variable(tf.zeros(1))
+        self.logits = tf.math.log_softmax(self.logits,axis=-1)
+        # self.softmax  = tf.keras.layers.Softmax(dim=-1) #
+    def call(self,x):
+        """
+            inputs :
+                x : input feature maps( B X C X W X H)
+            returns :
+                out : self attention value + input feature
+                attention: B X N X N (N is Width*Height)
+        """
+        m_batchsize,width ,height,C = self.shape
+        proj_query  = self.query_conv(x).reshape((m_batchsize,-1,width*height)).permute(0,2,1) # B X CX(N)
+        proj_key =  self.key_conv(x).reshape((m_batchsize,-1,width*height)) # B X C x (*W*H)
+        energy =  tf.matmul(proj_query,proj_key) # transpose check
+        attention = self.softmax(energy) # BX (N) X (N)
+        proj_value = self.value_conv(x).reshape((m_batchsize,-1,width*height)) # B X C X N
 
-            out = tf.matmul(proj_value, attention.permute(0, 2, 1))
-            out = out.reshape((m_batchsize, width, height, C))
+        out = tf.matmul(proj_value,attention.permute(0,2,1) )
+        out =out.reshape((m_batchsize,width,height,C))
 
-            out = self.gamma * out + x
-            return out
-
+        out = self.gamma*out + x
+        return out
 class Self_Expressive(Layer):
 	def __init__(self, batch_size, **kwargs):
 		super(Self_Expressive, self).__init__(**kwargs)
