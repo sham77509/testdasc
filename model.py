@@ -21,6 +21,40 @@ tf.keras.backend.set_floatx('float32')
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 # os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
+class Self_Attn(Layer):
+        """ Self attention Layer"""
+        def __init__(self, in_dim, activation):
+            super(Self_Attn, self).__init__()
+            self.chanel_in = in_dim
+            self.activation = activation
+
+            self.query_conv = nn.Conv2D(filters=in_dim // 8, kernel_size=1)
+            self.key_conv = nn.Conv2D(filters=in_dim // 8, kernel_size=1)
+            self.value_conv = nn.Conv2D(filters=in_dim, kernel_size=1)
+            self.gamma = tf.Variable(tf.zeros(1))
+
+            self.softmax = tf.keras.layers.Softmax(dim=-1)  #
+        def call(self, x):
+            """
+                inputs :
+                    x : input feature maps( B X C X W X H)
+                returns :
+                    out : self attention value + input feature
+                    attention: B X N X N (N is Width*Height)
+         """
+            m_batchsize, width, height, C = self.shape
+            proj_query = self.query_conv(x).reshape((m_batchsize, -1, width * height)).permute(0, 2, 1)  # B X CX(N)
+            proj_key = self.key_conv(x).reshape((m_batchsize, -1, width * height))  # B X C x (*W*H)
+            energy = tf.matmul(proj_query, proj_key)  # transpose check
+            attention = self.softmax(energy)  # BX (N) X (N)
+            proj_value = self.value_conv(x).reshape((m_batchsize, -1, width * height))  # B X C X N
+
+            out = tf.matmul(proj_value, attention.permute(0, 2, 1))
+            out = out.reshape((m_batchsize, width, height, C))
+
+            out = self.gamma * out + x
+            return out
+
 class Self_Expressive(Layer):
 	def __init__(self, batch_size, **kwargs):
 		super(Self_Expressive, self).__init__(**kwargs)
@@ -91,7 +125,7 @@ class ConvAE(Model):
 						  kernel_regularizer=tf.keras.regularizers.l1()),
 			layers.Reshape((-1, 3840), trainable=False)
 		])
-
+		self.self_attention = Self_Attn(3840,'relu')
 		self.self_expressive = Self_Expressive(self.batch_size, input_shape=(batch_size, batch_size))
 		self.z_conv = None
 		self.z_se = None
@@ -111,6 +145,7 @@ class ConvAE(Model):
 		z = tf.reshape(z, [self.batch_size, 3840])	# 整个batch一起训练
 		self.z_conv = z
 		# print(z)
+		z = self.self_attention(z)
 		z = self.self_expressive(z)
 		self.z_se = z									# self_expressive_z = theta*z
 		# print("z_se:", z.shape)
@@ -146,7 +181,7 @@ class Mnist_ConvAE(Model):
 						  kernel_initializer = tf.keras.initializers.GlorotUniform()),
 			layers.Reshape((-1, 80), trainable=False)
 		])
-
+		self.self_attention = Self_Attn(80,'relu')
 		self.self_expressive = Self_Expressive(self.batch_size, input_shape=(batch_size, batch_size))
 		self.z_conv = None
 		self.z_se = None
@@ -176,6 +211,7 @@ class Mnist_ConvAE(Model):
 		z = self.encoder(x)
 		z = tf.reshape(z, [self.batch_size, -1])	# 整个batch一起训练
 		self.z_conv = z
+		z = self.self_attention(z)
 		z = self.self_expressive(z)
 		self.z_se = z									# self_expressive_z = theta*z
 		# print("z_se:", z.shape)
