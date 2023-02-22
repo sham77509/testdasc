@@ -67,4 +67,4 @@ if __name__ == "__main__":
 		train_db = train_db.batch(1440).shuffle(30)
 
 		theta = train(train_db, epoch_num=args.epoch, batch_size=args.batch_size, pre_train_epoch=args.pretrain_epoch,
-				  alpha=args.alpha, g_lr=args.lr_g, d_lr=args.lr_d, pretrain=args.pretrain)
+				  alpha=args.alpha, g_lr=args.lr_g, d_lr=args.lr_d)
