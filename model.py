@@ -10,6 +10,7 @@ import math
 from scipy.linalg import qr
 from itertools import combinations as comb
 import tensorflow.python.keras.layers as nn
+from tensorflow import math
 # from scipy.sparse.linalg import svds
 # from sklearn.preprocessing import normalize
 
@@ -33,8 +34,9 @@ class Self_Attn(Layer):
             self.key_conv = nn.Conv2D(filters=in_dim // 8, kernel_size=1)
             self.value_conv = nn.Conv2D(filters=in_dim, kernel_size=1)
             self.gamma = tf.Variable(tf.zeros(1))
-
-            self.softmax = tf.keras.layers.Softmax(dim=-1)  #
+	    self.logits = tf.math.log_softmax(self.logits,axis=-1)
+            #self.softmax = tf.keras.layers.Softmax(dim=-1)
+		
         def call(self, x):
             """
                 inputs :
