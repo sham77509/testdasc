@@ -230,7 +230,7 @@ class DASC(object):
 		self.batch_size = batch_size
 		# self.conv_ae = ConvAE(batch_size=batch_size, input_shape=input_shape)
 		self.conv_ae = model(batch_size=batch_size, input_shape=input_shape)
-		self.conv_ae.build(input_shape=input_shape)
+		self.conv_ae.build(input_shape=input_shape.astype(np.int32)
 		self._U = []	# 每个cluster对应的U Projection layer
 		self.u_matrix = []
 
